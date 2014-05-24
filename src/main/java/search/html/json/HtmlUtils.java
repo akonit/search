@@ -97,6 +97,24 @@ public class HtmlUtils {
 			
 			if (child.getText().startsWith("p ") || child.getText().equals("p")) {
 				text.append(child.toPlainTextString().trim()).append(" ");
+				
+				// костыль для криво оформленных новостей №1
+				boolean badHmtl = checkBadHtml(child);				
+				if (badHmtl) {
+					for (int j = 0; j < child.getChildren().size(); j++) {
+						Node subChild = child.getChildren().elementAt(j);
+						if (subChild != null 
+								&& subChild.getText().startsWith("span") 
+								&& regionProcessed
+								&& subChild.toPlainTextString().contains("№")) {
+							sourceLink = getSourceLink(subChild);
+							json.put("source", sourceLink);
+							
+							date = getDate(subChild);
+							json.put("date", date);
+						}
+					}
+				}
 			}
 		}
 		
@@ -208,5 +226,14 @@ public class HtmlUtils {
 		link = link.substring(link.lastIndexOf("href"));
 		link = link.substring(6, link.length() - 1);
 		return link;
+	}
+	
+	private boolean checkBadHtml(Node node) {
+        for (int j = 0; j < node.getChildren().size(); j++) {
+			if (node.getChildren().elementAt(j).getText().contains("span")) {
+				return true;
+			}
+        }
+		return false;
 	}
 }
