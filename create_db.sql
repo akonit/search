@@ -1,5 +1,8 @@
 -- create db
-CREATE DATABASE search_db;
+CREATE DATABASE search_db ENCODING 'win1251'
+   lc_ctype='ru_RU.CP1251'
+   lc_collate='ru_RU.CP1251'
+  TEMPLATE template0;
 
 -- create user
 CREATE USER search_user WITH password 'search';

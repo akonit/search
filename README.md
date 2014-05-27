@@ -27,6 +27,18 @@ sudo -u postgres psql < create_db.sql
 sudo -u postgres psql < drop_db.sql
 ```
 
+Если скрипт генерации БД падает, возможно, нужно установить кодировку:
+
+```
+sudo locale-gen ru_RU.CP1251
+```
+
+, затем перепнуть postgres:
+
+```
+sudo service postgresql restart
+```
+
 Сборка приложения
 -----------------
 
@@ -35,7 +47,7 @@ sudo -u postgres psql < drop_db.sql
   ```
   mvn clean package
   ```
-2. Переместить в папку, где будет запускать приложение, файл `target/search-html-to-json-jar-with-dependencies.jar`. Переименовать его в `search-html-to-json.jar` (ну или поправить скрипт run.sh).
+2. Переместить в папку, где будет запускаться приложение, файл `target/search-html-to-json-jar-with-dependencies.jar`. Переименовать его в `search-html-to-json.jar` (ну или поправить скрипт run.sh).
 
 3. Поместить в ту же папку файлы config.properties, create_db.sql, drop_db.sql, run.sh.
 
@@ -64,3 +76,4 @@ sudo -u postgres psql < drop_db.sql
   chmod +x run.sh
   ```
 4. Если коннект к бд не проходит - [wiki](http://help.ubuntu.ru/wiki/%D1%80%D1%83%D0%BA%D0%BE%D0%B2%D0%BE%D0%B4%D1%81%D1%82%D0%B2%D0%BE_%D0%BF%D0%BE_ubuntu_server/%D0%B1%D0%B0%D0%B7%D1%8B_%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85/postgresql), смотреть раздел *Настройка*.
+
