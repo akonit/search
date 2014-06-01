@@ -19,6 +19,8 @@ public class HtmlUtils {
 	
 	private final Connection connection;
 	
+	private static final int titleLimit = 60;
+	
 	public HtmlUtils(Connection connection) throws Exception {
 		this.connection = connection;
 	}
@@ -26,7 +28,10 @@ public class HtmlUtils {
 	public void loadHtml(int pagesNumber) throws Exception {
 		for (int i = 1; i <= pagesNumber; i ++) {
 			List<News> news = parsePage(url + i);
+			List<Statistic> stats = new ArrayList<>();
+			collectStatistic(stats, news);
 			DbUtils.putNewsToDb(news, connection);
+			DbUtils.putStatsToDb(stats, connection);
 		}
 	}
 	
@@ -51,6 +56,7 @@ public class HtmlUtils {
 					newsList.add(news);
 				} catch (Exception e) {
 					logger.warning("failed to parse node: " + node.getText());
+					e.printStackTrace();
 					continue;
 				}
             }
@@ -86,6 +92,9 @@ public class HtmlUtils {
 				json.put("branch", branch);
 				
 				link = getLink(child);
+				while(link.contains("\\")) {
+				    link = link.replace("\\", "");
+				}
 				json.put("link", link);
 			} else if (child.getText().startsWith("span") && regionProcessed) {
 				sourceLink = getSourceLink(child);
@@ -118,6 +127,7 @@ public class HtmlUtils {
 			}
 		}
 		
+		json.put("title", extractTitle(text.toString()));
 		News news = new News(text.toString(), json);
 		return news;
 	}
@@ -235,5 +245,49 @@ public class HtmlUtils {
 			}
         }
 		return false;
+	}
+	
+	/**
+	 * Извлечение заголовка новости из ее текста.
+	 * @param text текст новости.
+	 */
+	private String extractTitle(String text) {
+		int length = text.length();
+		if (length < 1) {
+			return "";
+		}
+
+		for (int i = 1; i < length; i++) {
+			if (Character.toString(text.charAt(i)).equals(".")
+					&& !Character.toString(text.charAt(i - 1)).toUpperCase()
+							.equals(Character.toString(text.charAt(i - 1)))) {
+				String title = text.substring(0, i);
+				if (title.length() > titleLimit) {
+					title = title.substring(0, titleLimit - 3).concat("...");
+				}
+				return title;
+			}
+		}
+
+		return "";
+	}
+	
+	public void collectStatistic(List<Statistic> stats, List<News> newsList) {
+		if (newsList != null) {
+			for (News news: newsList) {
+				String source = (String) news.getJson().get("source");
+				boolean presents = false;
+				for (Statistic stat : stats) {
+					if (stat.getSource().equals(source)) {
+						stat.increment();
+						presents = true;
+					}
+				}
+				
+				if (!presents) {
+				    stats.add(new Statistic(source, 1));
+				}
+			}
+		}
 	}
 }

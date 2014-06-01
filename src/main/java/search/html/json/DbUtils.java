@@ -1,5 +1,6 @@
 package search.html.json;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -51,6 +52,21 @@ public class DbUtils {
 			ps.executeBatch();
 		} catch (SQLException e) {
 			logger.warning("failed to add data to DB");
+		}
+	}
+	
+	public static void putStatsToDb(List<Statistic> stats, Connection c) {
+		String call = "{call update_stats(?, ?)}";
+		try (CallableStatement cs = c.prepareCall(call);) {
+			for (Statistic stat : stats) {
+				cs.setInt(1, stat.getNewsNumber());
+				cs.setString(2, stat.getSource());
+				cs.addBatch();
+			}
+			
+			cs.executeBatch();
+		} catch (SQLException e) {
+			logger.warning("failed to add stats to DB");
 		}
 	}
 }
