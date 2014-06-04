@@ -27,6 +27,12 @@ sudo -u postgres psql < create_db.sql
 sudo -u postgres psql < drop_db.sql
 ```
 
+Дамп БД:
+
+```
+sudo -u postgres pg_dump search_db > dump
+```
+
 Если скрипт генерации БД падает, возможно, нужно установить кодировку:
 
 ```

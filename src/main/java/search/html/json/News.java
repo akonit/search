@@ -1,6 +1,6 @@
 package search.html.json;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 public class News {
 

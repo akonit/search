@@ -9,7 +9,7 @@ import org.htmlparser.Node;
 import org.htmlparser.Parser;
 import org.htmlparser.filters.TagNameFilter;
 import org.htmlparser.util.NodeList;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 public class HtmlUtils {
 
