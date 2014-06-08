@@ -17,6 +17,9 @@ public class HtmlUtils {
 	
 	public static final String url = "http://polpred.com/news/?&page=";
 	
+	public static final String triple = "'''";
+	public static final String spaced_triple = "' ' '";
+	
 	private final Connection connection;
 	
 	private static final int titleLimit = 60;
@@ -85,23 +88,20 @@ public class HtmlUtils {
 			
 			if (child.getText().startsWith("span") && !regionProcessed) {
 				region = getRegion(child);
-				json.put("region", region);
+				json.put("region", postProcessing(region));
 				regionProcessed = true;
 				
 				branch = getBranch(child);
-				json.put("branch", branch);
+				json.put("branch", postProcessing(branch));
 				
 				link = getLink(child);
-				while(link.contains("\\")) {
-				    link = link.replace("\\", "");
-				}
-				json.put("link", link);
+				json.put("link", postProcessing(link));
 			} else if (child.getText().startsWith("span") && regionProcessed) {
 				sourceLink = getSourceLink(child);
-				json.put("source", sourceLink);
+				json.put("source", postProcessing(sourceLink));
 				
 				date = getDate(child);
-				json.put("date", date);
+				json.put("date", postProcessing(date));
 			}
 			
 			if (child.getText().startsWith("p ") || child.getText().equals("p")) {
@@ -117,19 +117,41 @@ public class HtmlUtils {
 								&& regionProcessed
 								&& subChild.toPlainTextString().contains("№")) {
 							sourceLink = getSourceLink(subChild);
-							json.put("source", sourceLink);
+							json.put("source", postProcessing(sourceLink));
 							
 							date = getDate(subChild);
-							json.put("date", date);
+							json.put("date", postProcessing(date));
 						}
 					}
 				}
 			}
 		}
 		
-		json.put("title", extractTitle(text.toString()));
-		News news = new News(text.toString(), json);
+		json.put("title", postProcessing(extractTitle(text.toString())));
+		News news = new News(postProcessing(text.toString()), json);
 		return news;
+	}
+	
+	private String postProcessing(String text) {
+		text = text.replace(triple, spaced_triple);
+		text = text.replace("&lt;", "<");
+		text = text.replace("&gt;", ">");
+		text = text.replace("&amp;", "&");
+		text = text.replace("&quot;", "'");
+		text = text.replace("&nbsp;", " ");
+		text = text.replace("&frasl;", "/");
+		text = text.replace("&ndash;", "-");
+		text = text.replace("&mdash;", "-");
+		text = text.replace("&hellip;", "...");
+		text = text.replace("&laquo;", "\"");
+		text = text.replace("&raquo;", "\"");
+		text = text.replace("&ldquo;", "\"");
+		text = text.replace("&rdquo;", "\"");
+		text = text.replace("&auml;", "a");
+		text = text.replace("&aacute;", "a");
+		text = text.replace("&Aacute;", "A");
+		text = text.replace("&Auml;", "A");
+		return text;
 	}
 	
 	/**
